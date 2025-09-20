@@ -31,10 +31,17 @@ _chain_with_history = RunnableWithMessageHistory(
     history_messages_key="history",
 )
 
+_prompt_no_hist = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant."),
+    ("human", "{input}"),
+])
+
+_chain_without_history = _prompt_no_hist | _llm | StrOutputParser()
+
 async def send_message(msg: str, id: Optional[uuid.UUID] = None):
 
     if id is None:
-        answer = await _base_chain.ainvoke({"input": msg})
+        answer = await _chain_without_history.ainvoke({"input": msg})
         return answer
 
     cfg = {"configurable": {"session_id": str(id)}}
